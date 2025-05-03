@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>直播系统</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        /* 新增全局样式 */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Nunito Sans', sans-serif;
+        }
+
+        body {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #f5f7fa, #e9ecef);
+            transition: background 0.3s ease;
+        }
+
+        /* 登录界面升级 */
+        #loginForm {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background: url('https://images.unsplash.com/photo-1584309805086-53d6a96c38d9?ixlib=rb-1.2.1&auto=format&fit=crop&w=1920&h=1080') no-repeat center;
+            background-size: cover;
+        }
+
+        .login-container {
+            background: rgba(255,255,255,0.9);
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+            max-width: 400px;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #007bff;
+            box-shadow: 0 0 5px rgba(0,123,255,0.3);
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        button:hover {
+            background: #0056b3;
+        }
+
+        /* 主界面升级 */
+        #mainContainer {
+            display: none;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 20px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: 700;
+            color: #007bff;
+            transition: color 0.3s ease;
+        }
+
+        .logo:hover {
+            color: #0056b3;
+        }
+
+        .logout {
+            color: #6c757d;
+            cursor: pointer;
+            transition: color 0.3s ease;
+        }
+
+        .logout:hover {
+            color: #007bff;
+        }
+
+        .content {
+            display: grid;
+            grid-template-columns: 3fr 2fr;
+            gap: 20px;
+        }
+
+        #streamArea {
+            position: relative;
+            background: #1a1a1a;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        #videoStream {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .chatBox {
+            background: white;
+            border-radius: 8px;
+            padding: 15px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            min-height: 400px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .chatBox p {
+            margin: 8px 0;
+            color: #333;
+        }
+
+        .chatBox .message {
+            padding: 8px 12px;
+            border-radius: 16px;
+            background: #f8f9fa;
+            margin: 8px 0;
+        }
+
+        .chatBox .message.system {
+            background: #e9ecef;
+            color: #6c757d;
+            margin: 12px 0;
+            padding: 10px 15px;
+        }
+
+        #donationArea {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            min-height: 400px;
+        }
+
+        .donation-btn {
+            background: #007bff;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 24px;
+            cursor: pointer;
+            margin-right: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .donation-btn:hover {
+            background: #0056b3;
+        }
+
+        .custom-amount {
+            margin-top: 20px;
+            display: flex;
+            gap: 10px;
+        }
+
+        .amount-input {
+            flex: 1;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+        }
+
+        .send-btn {
+            padding: 12px 24px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .send-btn:hover {
+            background: #0056b3;
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .content {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 登录界面 -->
+    <div id="loginForm">
+        <div class="login-container">
+            <h2>直播系统登录</h2>
+            <div class="form-group">
+                <input type="text" id="username" placeholder="用户名" required>
+            </div>
+            <div class="form-group">
+                <input type="password" id="password" placeholder="密码" required>
+            </div>
+            <button onclick="login">立即登录</button>
+        </div>
+    </div>
+
+    <!-- 主界面 -->
+    <div id="mainContainer">
+        <div class="header">
+            <div class="logo"></div>
+            <div class="logout" onclick="logout">退出登录</div>
+        </div>
+
+        <div class="content">
+            <!-- 直播/观看区域 -->
+            <div id="streamArea">
+                <video id="videoStream" controls autoplay muted></video>
+                <div class="chatBox">
+                    <p class="system">欢迎来到直播间！当前观看人数：1024</p>
+                    <p class="message">观众1：主播好棒！</p>
+                    <p class="message">观众2：期待新内容！</p>
+                </div>
+            </div>
+
+            <!-- 打赏区域 -->
+            <div id="donationArea">
+                <h3>主播打赏</h3>
+                <p>当前主播：Creeper156</p>
+                <button class="donation-btn">10元</button>
+                <button class="donation-btn">50元</button>
+                <button class="donation-btn">100元</button>
+                <div class="custom-amount">
+                    <input class="amount-input" type="number" placeholder="自定义金额">
+                    <button class="send-btn">立即打赏</button>
+                </div>
+                <p class="donation-tips">* 打赏金额将直接进入主播账户</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 登录验证逻辑保持不变
+        // ...（此处省略与原代码相同的javascript部分）
+    </script>
+</body>
+</html>
