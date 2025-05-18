@@ -1,1 +1,130 @@
-<iframe src="https://player.twitch.tv/?channel=creeper_156&parent=https://156sr-dogs.github.io/C_live/" frameborder="0" allowfullscreen="true" scrolling="no" height="1870" width="800"></iframe>
+<!DOCTYPE html>
+<html>
+<head>
+    <title>游戏直播系统</title>
+    <style>
+        #video-container {
+            position: relative;
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        #video {
+            width: 100%;
+            background: #000;
+        }
+        #danmaku-container {
+            position: absolute;
+            top: 20px;
+            left: 0;
+            right: 0;
+            pointer-events: none;
+        }
+        .danmaku {
+            position: absolute;
+            color: #fff;
+            text-shadow: 2px 2px 2px #000;
+            white-space: nowrap;
+            font-size: 24px;
+        }
+        .controls {
+            margin-top: 10px;
+            text-align: center;
+        }
+        input[type="text"] {
+            width: 300px;
+            padding: 8px;
+        }
+        button {
+            padding: 8px 20px;
+            background: #007bff;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div id="video-container">
+        <video id="video" controls></video>
+        <div id="danmaku-container"></div>
+    </div>
+    
+    <div class="controls">
+        <input type="text" id="danmaku-input" placeholder="输入弹幕...">
+        <button onclick="sendDanmaku()">发送</button>
+        <button onclick="toggleFullscreen()">全屏</button>
+    </div>
+
+    <!-- 依赖库 -->
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+    <script src="https://cdn.socket.io/4.5.0/socket.io.min.js"></script>
+
+    <script>
+        // 初始化播放器
+        const video = document.getElementById('video');
+        let hls;
+
+        // 示例直播地址（替换为你的实际地址）
+        const streamUrl = 'http://your-server/live/stream.m3u8';
+
+        if (Hls.isSupported()) {
+            hls = new Hls();
+            hls.loadSource(streamUrl);
+            hls.attachMedia(video);
+            hls.on(Hls.Events.MANIFEST_PARSED, () => video.play());
+        } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+            video.src = streamUrl;
+            video.addEventListener('loadedmetadata', () => video.play());
+        }
+
+        // WebSocket连接（替换为你的服务器地址）
+        const socket = io('http://your-websocket-server:3000');
+
+        // 弹幕处理
+        function sendDanmaku() {
+            const input = document.getElementById('danmaku-input');
+            const text = input.value.trim();
+            if (text) {
+                socket.emit('danmaku', text);
+                input.value = '';
+            }
+        }
+
+        // 接收弹幕并显示
+        socket.on('danmaku', (text) => {
+            const container = document.getElementById('danmaku-container');
+            const danmaku = document.createElement('div');
+            danmaku.className = 'danmaku';
+            danmaku.textContent = text;
+            
+            // 随机弹幕轨道
+            const top = Math.random() * 80 + 5;
+            danmaku.style.top = `${top}%`;
+            danmaku.style.left = '100%';
+            
+            container.appendChild(danmaku);
+            
+            // 动画效果
+            const duration = 8000; // 8秒
+            danmaku.animate([
+                { transform: 'translateX(100%)' },
+                { transform: 'translateX(-100%)' }
+            ], { duration });
+            
+            setTimeout(() => danmaku.remove(), duration);
+        });
+
+        // 全屏切换
+        function toggleFullscreen() {
+            if (!document.fullscreenElement) {
+                videoContainer.requestFullscreen().catch(err => {
+                    alert(`全屏失败: ${err.message}`);
+                });
+            } else {
+                document.exitFullscreen();
+            }
+        }
+    </script>
+</body>
+</html>
